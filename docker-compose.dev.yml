@@ -1,0 +1,39 @@
+networks:
+  codeflix-net:
+    external: true
+
+services:
+  api-catalogue-video:
+    image: api-catalogue-video
+    container_name: api-catalogue-video
+    build: .
+    ports:
+      - '${EXTERNAL_PORT:-3001}:${PORT:-3000}'
+    command: bash -c "yarn && yarn run start:dev"
+    volumes:
+      - ./:/code
+      - '/etc/timezone:/etc/timezone:ro'
+      - '/etc/localtime:/etc/localtime:ro'
+    env_file: [./.env]
+    depends_on:
+      - elasticsearch
+    networks:
+      - codeflix-net
+
+  elasticsearch:
+    image: elasticsearch:7.17.7
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    networks:
+      - codeflix-net
+  
+  kibana:
+    image: kibana:7.17.1
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - codeflix-net

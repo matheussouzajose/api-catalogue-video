@@ -1,0 +1,17 @@
+services:
+  api-catalogue-video:
+    image: api-catalogue-video
+    container_name: api-catalogue-video
+    build: .
+    ports:
+      - '${EXTERNAL_PORT:-3001}:${PORT:-3000}'
+    command: bash -c "yarn && yarn run start:dev"
+    volumes:
+      - ./:/code
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - ~/.docker/config.json:/home/node/.docker/config.json:ro
+    env_file: [./.env]
+    # stop_signal: SIGKILL
+    # stdin_open: true
+    # tty: true
+    # privileged: true

@@ -1,0 +1,77 @@
+# Ver doc da API do Elastic Search
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+
+
+@host = localhost:9200
+### Verifique se o Elastic Search está funcionando
+GET http://{{host}}
+
+###
+GET http://{{host}}/_cat/indices
+
+### Crie um índice no Elastic Search
+PUT http://{{host}}/api_catalogue
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "nome": {
+        "type": "text"
+      },
+      "idade": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+### Insira um documento no índice
+POST http://{{host}}/aula/_doc
+Content-Type: application/json
+
+{
+  "nome": "João",
+  "idade": 25
+}
+
+### Consulte o documento inserido
+GET http://{{host}}/aula/_doc/whHRlpMBBk2-2qCglqsr
+
+### Atualize o documento inserido
+POST http://{{host}}/aula/_update/whHRlpMBBk2-2qCglqsr
+Content-Type: application/json
+
+{
+  "doc": {
+    "idade": 27
+  }
+}
+
+### Filtrar documentos
+POST http://{{host}}/aula/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "nome": "João"
+    }
+  }
+}
+
+### Filtrar todos os documentos
+POST http://{{host}}/aula/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+### Excluir um documento
+DELETE http://{{host}}/aula/_doc/whHRlpMBBk2-2qCglqsr
