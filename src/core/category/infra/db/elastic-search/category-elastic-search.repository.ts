@@ -10,7 +10,11 @@ import {
 } from '@core/category/infra/db/elastic-search/category-elastic-search.mapper';
 import { NotFoundError } from '@core/shared/domain/errors/not-found.error';
 import { ICriteria } from '@core/shared/domain/repository/criteria.interface';
-import { SortDirection } from '@core/shared/domain/value-object/search-params.vo';
+import {
+  SearchParams,
+  SortDirection,
+} from '@core/shared/domain/value-object/search-params.vo';
+import { SearchResult } from '@core/shared/domain/value-object/search-result.vo';
 import { SoftDeleteElasticSearchCriteria } from '@core/shared/infra/db/elastic-search/soft-delete-elastic-search.criteria';
 import {
   QueryDslQueryContainer,
@@ -21,7 +25,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 export class CategoryElasticSearchRepository implements ICategoryRepository {
   sortableFields: string[] = ['name', 'created_at'];
   sortableFieldsMap: Record<string, string> = {
-    name: 'category_name',
+    name: 'category_name.keyword',
     created_at: 'created_at',
   };
   scopes: Map<string, ICriteria> = new Map();
@@ -30,6 +34,34 @@ export class CategoryElasticSearchRepository implements ICategoryRepository {
     private esClient: ElasticsearchService,
     private index: string,
   ) {}
+
+  search(
+    props: SearchParams<string>,
+  ): Promise<SearchResult<CategoryAggregate>> {
+    throw new Error('Method not implemented.');
+  }
+
+  async searchByCriteria(
+    criterias: ICriteria[],
+  ): Promise<SearchResult<CategoryAggregate>> {
+    let query: QueryDslQueryContainer = {};
+    for (const criteria of criterias) {
+      query = criteria.applyCriteria(query);
+    }
+    const result = await this.esClient.search({
+      body: {
+        query,
+      },
+    });
+    return new SearchResult({
+      total: result.body.hits.total.value,
+      current_page: 1,
+      per_page: 15,
+      items: result.body.hits.hits.map((hit: any) =>
+        CategoryElasticSearchMapper.toEntity(hit._id, hit._source),
+      ),
+    });
+  }
 
   async insert(entity: CategoryAggregate): Promise<void> {
     await this.esClient.index({
@@ -190,7 +222,6 @@ export class CategoryElasticSearchRepository implements ICategoryRepository {
     }
 
     query = this.applyScopes(query);
-
     const result = await this.esClient.search({
       index: this.index,
       body: {

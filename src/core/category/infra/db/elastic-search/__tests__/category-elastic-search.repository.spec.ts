@@ -3,6 +3,8 @@ import {
   CategoryId,
 } from '@core/category/domain/entity/category.aggregate';
 import { CategoryElasticSearchRepository } from '@core/category/infra/db/elastic-search/category-elastic-search.repository';
+import { FindByDescriptionCriteria } from '@core/category/infra/db/elastic-search/criteria/find-by-description.criteria';
+import { FindByNameCriteria } from '@core/category/infra/db/elastic-search/criteria/find-by-name.criteria';
 import { NotFoundError } from '@core/shared/domain/errors/not-found.error';
 import { setupElasticsearch } from '@core/shared/infra/testing/global-helpers';
 
@@ -300,5 +302,45 @@ describe('CategoryElasticSearchRepository Integration Tests', () => {
 
     await repository.delete(entity.entityId);
     await expect(repository.findById(entity.entityId)).resolves.toBeNull();
+  });
+
+  it('should search by criteria', async () => {
+    const category1 = CategoryAggregate.fake()
+      .aCategory()
+      .withName('Category 1')
+      .withDescription('Description 1')
+      .build();
+
+    const category2 = CategoryAggregate.fake()
+      .aCategory()
+      .withName('Category 2')
+      .withDescription('Description 2')
+      .build();
+
+    const category3 = CategoryAggregate.fake()
+      .aCategory()
+      .withName('Category 3')
+      .withDescription('Description 3')
+      .build();
+
+    const category4 = CategoryAggregate.fake()
+      .aCategory()
+      .withName('Category 4')
+      .withDescription('Description 4')
+      .build();
+
+    await repository.bulkInsert([category1, category2, category3, category4]);
+
+    const findByNameCriteria = new FindByNameCriteria('Category 2');
+    const result = await repository.searchByCriteria([findByNameCriteria]);
+    // console.log(result);
+
+    const findByDescriptionCriteria = new FindByDescriptionCriteria(
+      'Description 1',
+    );
+    const result2 = await repository.searchByCriteria([
+      findByDescriptionCriteria,
+    ]);
+    // console.log(result2);
   });
 });

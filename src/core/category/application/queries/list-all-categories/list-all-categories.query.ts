@@ -33,7 +33,7 @@ export class ListAllCategoriesQuery
     private index: string,
   ) {}
 
-  async execute(input: ListCategoriesInput): Promise<ListCategoriesOutput> {
+  async execute(input: ListCategoriesInput): Promise<any> {
     const { filter } = input;
     this.ignoreSoftDeleted();
 

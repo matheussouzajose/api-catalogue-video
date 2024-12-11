@@ -3,6 +3,7 @@ import {
   CategoryId,
 } from '@core/category/domain/entity/category.aggregate';
 import { IRepository } from '@core/shared/domain/repository/repository.interface';
+import { ISearchableRepository } from '@core/shared/domain/repository/searchable.repository.interface';
 import {
   SearchParams,
   SearchParamsConstructorProps,
@@ -65,5 +66,9 @@ export class CategorySearchParams extends SearchParams<CategoryFilter> {
 export class CategorySearchResult extends SearchResult<CategoryAggregate> {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// export interface ICategoryRepository
+//   extends IRepository<CategoryAggregate, CategoryId> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ICategoryRepository
-  extends IRepository<CategoryAggregate, CategoryId> {}
+  extends ISearchableRepository<CategoryAggregate, CategoryId> {}
